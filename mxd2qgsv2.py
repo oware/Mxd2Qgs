@@ -1,5 +1,13 @@
 #-----------------------------------------------------------
-#
+# Mxd2Qgs ver 2.0
+# Copyright (C) 2011 Allan Maungu
+# Modified by: Shiuli Pervin 
+# EMAIL: lumtegis (at) gmail.com
+# WEB  : http://geoscripting.blogspot.com
+# Usage : Exporting current ArcMap document layers to Quantum GIS file
+# The resulting file can be opened in Quantum GIS
+# Tested on ArcMap 10.4, Python 2.7.10 and Quantum GIS 2.18.13 'Las Palmas' 
+#----------------------------------------------------------
 # Mxd2Qgs ver 1.0
 # Copyright (C) 2011 Allan Maungu 
 # EMAIL: lumtegis (at) gmail.com
@@ -46,7 +54,7 @@ doc = Document()
 # Create the <qgis> base element
 qgis = doc.createElement("qgis")
 qgis.setAttribute("projectname", " ")
-qgis.setAttribute("version", "1.6.0-Capiapo")
+qgis.setAttribute("version", "2.18.13 'Las Palmas'")
 doc.appendChild(qgis)
 
 # Create the <title> element
@@ -63,6 +71,7 @@ print 'Converting mxd........'
 df = arcpy.mapping.ListDataFrames(mxd)[0]
 unit = doc.createTextNode(df.mapUnits)
 xmin1 = doc.createTextNode(str(df.extent.XMin))
+arcpy.AddMessage(xmin1)
 ymin1 = doc.createTextNode(str(df.extent.YMin))
 xmax1 = doc.createTextNode(str(df.extent.XMax))
 ymax1 = doc.createTextNode(str(df.extent.YMax))
@@ -83,8 +92,9 @@ authid3 = doc.createTextNode("EPSG:"+str(df.spatialReference.factoryCode))
 
 # Layerlist elements
 lyrlist = arcpy.mapping.ListLayers(df)
+arcpy.AddMessage(lyrlist)
 count1 = str(len(lyrlist))
-
+arcpy.AddMessage(count1)
 # mapcanvas
 def map_canvas():
     # Create the <mapcanvas> element
@@ -223,14 +233,16 @@ def project_layers():
     qgis.appendChild(projectlayers)
 
     for lyr in lyrlist:
-        
+        #arcpy.AddMessage(lyr)
         if(lyr.isGroupLayer == False and lyr.isRasterLayer == False):
             geometry1 = arcpy.Describe(lyr)
+            
             geometry2 = str(geometry1.shapeType)
             ds = doc.createTextNode(str(lyr.dataSource))
         
             name1 = doc.createTextNode(str(lyr.name)+str(20110427170816078))
             name2 = doc.createTextNode(str(lyr.name))
+            arcpy.AddMessage(name2)
 
                    
            # Create the <maplayer> element
@@ -283,19 +295,19 @@ def project_layers():
             srid = doc.createElement("srid")
             srid.appendChild(srid2)
             spatialrefsys.appendChild(srid)
-       
+
 
             # Create the <authid> element
             authid = doc.createElement("authid")
             authid.appendChild(authid3)
             spatialrefsys.appendChild(authid)
-        
+
 
             # Create the <description> element
             description = doc.createElement("description")
             description.appendChild(description2)
             spatialrefsys.appendChild(description)
-        
+
 
             # Create the <projectionacronym> element
             projectionacronym = doc.createElement("projectionacronym")
@@ -305,13 +317,13 @@ def project_layers():
             ellipsoidacronym = doc.createElement("ellipsoidacronym")
             ellipsoidacronym.appendChild(ellipsoidacronym2)
             spatialrefsys.appendChild(ellipsoidacronym)
-        
+
 
             # Create the <geographicflag> element
             geographicflag = doc.createElement("geographicflag")
             geographicflag.appendChild(geographicflag2)
             spatialrefsys.appendChild(geographicflag)
-        
+
             # Create the <transparencyLevelInt> element
             transparencyLevelInt = doc.createElement("transparencyLevelInt")
             transparency2 = doc.createTextNode("255")
@@ -409,6 +421,7 @@ project_layers()
 
 try:
     xml.dom.ext.PrettyPrint(doc, f)
+    arcpy.AddMessage("we are here")
 finally:
     f.close()
 
